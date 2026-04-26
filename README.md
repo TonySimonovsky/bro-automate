@@ -11,8 +11,6 @@ against real web pages in your already-authenticated Chrome and returns structur
 
 ## Repo layout
 
-Top-level directories after you clone the repository:
-
 ```
 .
 ├── extension/         # Chrome MV3 extension (service worker + scenarios)
