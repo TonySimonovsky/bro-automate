@@ -78,12 +78,3 @@ The same discovery pattern runs in **GitHub Actions** on every push and pull req
 - **Build / waves:** `pm/build/v.0.01/waves.md`
 
 *(Paths above exist in the private dev repository; they are not part of the public mirror.)*
-
----
-
-## Coexistence with the existing Upwork scraper
-
-The native host name (`aichamp.bro.automate`), socket path
-(`/tmp/aichamp-bro-automate.sock`), log directory (`~/.aichamp-bro-automate/logs/`), and Chrome
-NMH manifest filename are all distinct from the existing `com.upwork.scraper.cco46` host — both
-can run concurrently. See PRD `FR-N3` and TDD §6.
