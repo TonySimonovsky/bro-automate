@@ -11,8 +11,10 @@ against real web pages in your already-authenticated Chrome and returns structur
 
 ## Repo layout
 
+Top-level directories after you clone the repository:
+
 ```
-bro-automate/code/main/
+.
 ├── extension/         # Chrome MV3 extension (service worker + scenarios)
 ├── native-host/       # Node.js native messaging host (Unix socket + HTTP I/O)
 ├── cli/               # bro.js — one-shot CLI for manual testing
@@ -24,7 +26,7 @@ bro-automate/code/main/
 
 ## Install
 
-From the **repo root** (`bro-automate/code/main/`):
+From the **repository root** (the folder that contains `extension/`, `native-host/`, and `cli/`):
 
 1. **Native host + schema copy** — writes `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/aichamp.bro.automate.json`, generates `native-host/host.installed.js` with an absolute Node shebang, and copies `schema/scenario.schema.json` → `extension/scenario.schema.json`. Does **not** touch unrelated Chrome native-messaging manifests unless paths were misconfigured.
 
