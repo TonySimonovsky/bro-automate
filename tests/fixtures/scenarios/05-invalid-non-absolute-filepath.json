@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1",
+  "id": "fixture-bad-filepath",
+  "name": "Fixture — non-absolute upload filePath",
+  "matches": [
+    "https://example.com/*"
+  ],
+  "steps": [
+    { "type": "navigate", "url": "https://example.com/" },
+    {
+      "type": "uploadFile",
+      "selector": "input[type=file]",
+      "filePath": "relative/path.pdf"
+    }
+  ]
+}

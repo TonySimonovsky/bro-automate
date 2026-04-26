@@ -1,0 +1,75 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+.eggs/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+# Anchored to root so they don't shadow nested paths like pm/build/.
+/dist/
+/build/
+*.egg
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.next/
+nuxt/
+.turbo/
+coverage/
+
+# Logs & temp
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.swp
+*~
+
+# IDEs (optional: remove lines if you commit shared editor config)
+.idea/
+.cursor/
+
+# --- pm/ (project management) ---
+# Do NOT add `pm/` wholesale: `pm/build/<version>/` is meant to be committed (PRD, TDD, contracts,
+# operator docs). Node tests and fixtures live at repo root `tests/`. Only ignore scratch / machine-local / high-churn paths here.
+pm/_review/
+# Meeting exports (e.g. Fireflies pull skill → pm/meetings/…); often large or sensitive.
+pm/meetings/
+# CLI debug JSONL default dir (also matched by global `logs/` below; listed for clarity).
+pm/build/**/logs/
+
+# Bro Automate
+# install.sh copies schema/scenario.schema.json into extension/ at install time
+# (TDD §3 build-time symlink). The in-package copy is generated, never hand-edited.
+extension/scenario.schema.json
+# install.sh generates host.installed.js — a copy of host.js with an absolute-node-path
+# shebang baked in (Chrome's NMH spawn env lacks nvm/Homebrew PATH, so /usr/bin/env node
+# can't find the user's node binary).
+native-host/host.installed.js
+

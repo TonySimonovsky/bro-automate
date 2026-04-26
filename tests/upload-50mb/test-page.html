@@ -1,0 +1,18 @@
+<!doctype html>
+<html><body>
+<h1>Bro Automate — 50MB upload test</h1>
+<input id="upload-input" type="file" />
+<div id="status">no file</div>
+<script>
+  const inp = document.getElementById('upload-input');
+  const status = document.getElementById('status');
+  inp.addEventListener('change', () => {
+    if (inp.files && inp.files[0]) {
+      const f = inp.files[0];
+      status.textContent = `file:${f.name} bytes:${f.size} type:${f.type || '(none)'}`;
+    } else {
+      status.textContent = 'no file';
+    }
+  });
+</script>
+</body></html>

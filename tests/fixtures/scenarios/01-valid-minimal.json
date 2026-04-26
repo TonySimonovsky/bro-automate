@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1",
+  "id": "fixture-minimal",
+  "name": "Fixture — minimal valid scenario",
+  "matches": [
+    "https://example.com/*"
+  ],
+  "steps": [
+    {
+      "type": "navigate",
+      "url": "https://example.com/"
+    }
+  ]
+}

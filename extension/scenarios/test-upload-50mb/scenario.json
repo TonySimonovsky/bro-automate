@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1",
+  "id": "test-upload-50mb",
+  "name": "(test rig) 50MB upload smoke",
+  "description": "Operator-driven Gate-3 smoke for the uploadFile step. Pre-req: tests/upload-50mb/server.mjs running on a known port and a 50MB file at /tmp/bro-automate-test-50mb.bin.",
+  "matches": ["http://127.0.0.1/*"],
+  "steps": [
+    { "type": "navigate", "url": "http://127.0.0.1:8765/" },
+    { "type": "waitForSelector", "selector": "#upload-input" },
+    { "type": "uploadFile", "selector": "#upload-input", "filePath": "/tmp/bro-automate-test-50mb.bin", "fileName": "test-50mb.bin", "mime": "application/octet-stream" },
+    { "type": "waitForText", "text": "bytes:52428800" }
+  ]
+}

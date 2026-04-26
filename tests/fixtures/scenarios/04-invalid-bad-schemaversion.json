@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "999",
+  "id": "fixture-bad-version",
+  "name": "Fixture — unsupported schemaVersion (loader refusal)",
+  "matches": [
+    "https://example.com/*"
+  ],
+  "steps": [
+    { "type": "navigate", "url": "https://example.com/" }
+  ]
+}

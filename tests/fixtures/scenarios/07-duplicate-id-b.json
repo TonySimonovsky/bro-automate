@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1",
+  "id": "dup-test",
+  "name": "Fixture — duplicate id (second file)",
+  "matches": [
+    "https://example.org/*"
+  ],
+  "steps": [
+    { "type": "sleep", "ms": 0 }
+  ]
+}

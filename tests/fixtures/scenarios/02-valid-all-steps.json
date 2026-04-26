@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1",
+  "id": "fixture-all-step-types",
+  "name": "Fixture — one scenario covering every v0.01 step type",
+  "description": "Coverage fixture (not a realistic run order).",
+  "matches": [
+    "https://example.com/*",
+    "https://www.example.org/*"
+  ],
+  "defaultParams": {},
+  "steps": [
+    { "type": "navigate", "url": "https://example.com/a" },
+    { "type": "waitForSelector", "selector": "main", "timeoutMs": 15000 },
+    { "type": "waitForText", "text": "OK", "timeoutMs": 15000 },
+    { "type": "waitForState", "fn": "isReady", "timeoutMs": 15000, "args": {} },
+    { "type": "click", "selector": "button" },
+    { "type": "clickByCoordinates", "x": 10, "y": 20 },
+    { "type": "type", "selector": "input", "text": "hi", "clear": true },
+    { "type": "setContenteditable", "selector": "div[contenteditable]", "text": "body" },
+    { "type": "scroll", "selector": "footer", "intoView": true, "timeoutMs": 5000 },
+    {
+      "type": "extract",
+      "selector": "ul.items",
+      "fields": [
+        { "name": "title", "selector": "h2" },
+        { "name": "link", "selector": "a", "attr": "href" }
+      ],
+      "multiple": true,
+      "timeoutMs": 5000
+    },
+    { "type": "evaluate", "fn": "helper", "args": { "k": 1 } },
+    { "type": "sleep", "ms": 1 },
+    { "type": "uploadFile", "selector": "input[type=file]", "filePath": "/tmp/fixture.pdf", "fileName": "fixture.pdf" },
+    { "type": "screenshot", "selector": "main", "timeoutMs": 10000 }
+  ]
+}

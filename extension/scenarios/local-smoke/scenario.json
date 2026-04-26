@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1",
+  "id": "local-smoke",
+  "name": "Local smoke — deterministic browser pipeline",
+  "description": "Deterministic localhost scenario for Gate-3 browser verification: navigate -> waitForSelector -> click -> waitForText -> extract.",
+  "matches": [
+    "http://127.0.0.1/*"
+  ],
+  "steps": [
+    {
+      "type": "navigate",
+      "url": "http://127.0.0.1:8766/"
+    },
+    {
+      "type": "waitForSelector",
+      "selector": "#ready"
+    },
+    {
+      "type": "click",
+      "selector": "#increment"
+    },
+    {
+      "type": "waitForText",
+      "text": "count: 1"
+    },
+    {
+      "type": "extract",
+      "fields": [
+        {
+          "name": "status",
+          "selector": "#status"
+        },
+        {
+          "name": "count",
+          "selector": "#count"
+        }
+      ]
+    }
+  ]
+}

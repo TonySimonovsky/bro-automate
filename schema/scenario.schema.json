@@ -1,0 +1,276 @@
+{
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "matches",
+    "steps"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "module": {
+      "type": "string"
+    },
+    "matches": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "defaultParams": {
+      "type": "object"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/step"
+      }
+    }
+  },
+  "definitions": {
+    "step": {
+      "oneOf": [
+        { "$ref": "#/definitions/stepNavigate" },
+        { "$ref": "#/definitions/stepWaitForSelector" },
+        { "$ref": "#/definitions/stepWaitForText" },
+        { "$ref": "#/definitions/stepWaitForState" },
+        { "$ref": "#/definitions/stepClick" },
+        { "$ref": "#/definitions/stepClickByCoordinates" },
+        { "$ref": "#/definitions/stepType" },
+        { "$ref": "#/definitions/stepSetContenteditable" },
+        { "$ref": "#/definitions/stepScroll" },
+        { "$ref": "#/definitions/stepExtract" },
+        { "$ref": "#/definitions/stepEvaluate" },
+        { "$ref": "#/definitions/stepSleep" },
+        { "$ref": "#/definitions/stepUploadFile" },
+        { "$ref": "#/definitions/stepScreenshot" }
+      ]
+    },
+    "stepNavigate": {
+      "type": "object",
+      "required": [
+        "type",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "navigate" },
+        "url": { "type": "string" },
+        "newTab": { "type": "boolean" },
+        "timeoutMs": { "type": "number" },
+        "tabSlotTimeoutMs": { "type": "number" }
+      }
+    },
+    "stepWaitForSelector": {
+      "type": "object",
+      "required": [
+        "type",
+        "selector"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "waitForSelector" },
+        "selector": { "type": "string" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "stepWaitForText": {
+      "type": "object",
+      "required": [
+        "type",
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "waitForText" },
+        "text": { "type": "string" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "stepWaitForState": {
+      "type": "object",
+      "required": [
+        "type",
+        "fn"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "waitForState" },
+        "fn": { "type": "string" },
+        "timeoutMs": { "type": "number" },
+        "args": { "type": "object" }
+      }
+    },
+    "stepClick": {
+      "type": "object",
+      "required": [ "type" ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "click" },
+        "selector": { "type": "string" },
+        "text": { "type": "string" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "stepClickByCoordinates": {
+      "type": "object",
+      "required": [
+        "type",
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "clickByCoordinates" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "stepType": {
+      "type": "object",
+      "required": [
+        "type",
+        "selector",
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "type" },
+        "selector": { "type": "string" },
+        "text": { "type": "string" },
+        "clear": { "type": "boolean" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "stepSetContenteditable": {
+      "type": "object",
+      "required": [
+        "type",
+        "selector",
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "setContenteditable" },
+        "selector": { "type": "string" },
+        "text": { "type": "string" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "stepScroll": {
+      "type": "object",
+      "required": [ "type" ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "scroll" },
+        "selector": { "type": "string" },
+        "intoView": { "type": "boolean" },
+        "deltaX": { "type": "number" },
+        "deltaY": { "type": "number" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "extractField": {
+      "type": "object",
+      "required": [
+        "name",
+        "selector"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "selector": { "type": "string" },
+        "attr": { "type": "string" }
+      }
+    },
+    "stepExtract": {
+      "type": "object",
+      "required": [
+        "type",
+        "fields"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "extract" },
+        "selector": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/extractField" }
+        },
+        "multiple": { "type": "boolean" },
+        "timeoutMs": { "type": "number" }
+      }
+    },
+    "stepEvaluate": {
+      "type": "object",
+      "required": [
+        "type",
+        "fn"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "evaluate" },
+        "fn": { "type": "string" },
+        "args": { "type": "object" }
+      }
+    },
+    "stepSleep": {
+      "type": "object",
+      "required": [
+        "type",
+        "ms"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "sleep" },
+        "ms": { "type": "number" }
+      }
+    },
+    "stepUploadFile": {
+      "type": "object",
+      "required": [
+        "type",
+        "selector",
+        "filePath"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "uploadFile" },
+        "selector": { "type": "string" },
+        "filePath": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "fileName": { "type": "string" },
+        "mime": { "type": "string" }
+      }
+    },
+    "stepScreenshot": {
+      "type": "object",
+      "required": [ "type" ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "screenshot" },
+        "selector": { "type": "string" },
+        "timeoutMs": { "type": "number" }
+      }
+    }
+  }
+}

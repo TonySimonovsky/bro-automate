@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1",
+  "id": "dup-test",
+  "name": "Fixture — duplicate id (first file)",
+  "matches": [
+    "https://example.com/*"
+  ],
+  "steps": [
+    { "type": "navigate", "url": "https://example.com/" }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Bro Automate",
+  "version": "0.0.1",
+  "description": "Runs declarative automation scenarios on authenticated pages and returns JSON results via a native messaging host.",
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage",
+    "nativeMessaging",
+    "alarms",
+    "tabGroups",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Bro Automate"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "scenario.schema.json"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
