@@ -44,8 +44,11 @@ coverage/
 
 # Logs & temp
 *.log
+# RPA CDP runner JSON transcripts (scenario .../tmp/); keep screenshots and .md trackable.
+**/tmp/rpa-run-*.log.json
 logs/
-tmp/
+# Only repo-root tmp/ (nested .../tmp/ under scenarios etc. stays trackable).
+/tmp/
 temp/
 *.tmp
 *.swp
@@ -54,6 +57,7 @@ temp/
 # IDEs (optional: remove lines if you commit shared editor config)
 .idea/
 .cursor/
+.claude/
 
 # --- pm/ (project management) ---
 # Do NOT add `pm/` wholesale: `pm/build/<version>/` is meant to be committed (PRD, TDD, contracts,
@@ -63,6 +67,9 @@ pm/_review/
 pm/meetings/
 # CLI debug JSONL default dir (also matched by global `logs/` below; listed for clarity).
 pm/build/**/logs/
+
+# Public mirror
+public-mirror/
 
 # Bro Automate
 # install.sh copies schema/scenario.schema.json into extension/ at install time

@@ -1,10 +1,10 @@
 # Bro Automate
 
-Generic, agent-driven browser automation as a Chrome MV3 extension with a native-messaging
-bridge. External agents send JSON commands to the extension; the extension runs **scenarios**
-against real web pages in your already-authenticated Chrome and returns structured JSON results.
+Generic, agent-driven browser automation as a Chrome MV3 extension with a local HTTP bridge.
+External agents send JSON commands to the bridge; the extension executes them against real web
+pages in your already-authenticated Chrome and returns structured JSON results.
 
-- **Version:** v0.01
+- **Version:** 0.0.3
 - **Platform:** macOS + Google Chrome only
 
 ---
@@ -13,50 +13,42 @@ against real web pages in your already-authenticated Chrome and returns structur
 
 ```
 .
-├── extension/         # Chrome MV3 extension (service worker + scenarios)
-├── native-host/       # Node.js native messaging host (Unix socket + HTTP I/O)
-├── cli/               # bro.js — one-shot CLI for manual testing
-├── schema/            # canonical scenario.schema.json
-└── tests/             # Node test suite + fixtures
+└── extension/         # Chrome MV3 extension + Node HTTP bridge (server.js)
 ```
 
 ---
 
 ## Install
 
-From the **repository root** (the folder that contains `extension/`, `native-host/`, and `cli/`):
+1. **Load the unpacked extension** in Chrome: `chrome://extensions` → Developer mode → **Load unpacked** → select the `./extension` directory.
 
-1. **Native host + schema copy** — writes `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/aichamp.bro.automate.json`, generates `native-host/host.installed.js` with an absolute Node shebang, and copies `schema/scenario.schema.json` → `extension/scenario.schema.json`. Does **not** touch unrelated Chrome native-messaging manifests unless paths were misconfigured.
+2. **Start the bridge** from the repository root:
 
    ```sh
-   ./native-host/install.sh
+   node extension/server.js
    ```
 
-   Re-run after changing `host.js` or when Node moves. Use `--force` only when the installer refuses due to an existing manifest or schema mtimes (see `install.sh --help`).
+   The bridge listens on `http://localhost:7823`. The extension connects automatically on load.
 
-2. **Load the unpacked extension** in Chrome: `chrome://extensions` → Developer mode → **Load unpacked** → select the `./extension` directory.
+3. **Sanity check:**
 
-3. **Native messaging `allowed_origins`** — after the first load, open `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/aichamp.bro.automate.json` and replace `chrome-extension://<EXTENSION_ID>/` with your real extension ID from `chrome://extensions`. Re-running `install.sh` preserves a non-placeholder origin if already set.
+   ```sh
+   curl -sS http://localhost:7823/status
+   ```
 
-4. **Sanity check** — open the service worker DevTools for Bro Automate; you should see a `hostReady` payload with `{ httpPort, token }`.
+   Should return JSON immediately. If it does, agents can start sending commands.
 
 ---
 
 ## Smoke tests
 
-Example CLI commands (repo root; terminal JSON on **stdout**, progress on **stderr**):
+With the bridge running and extension loaded, list open tabs:
 
 ```sh
-./cli/bro.js '{"action":"runScenario","scenarioId":"upwork-collect","requestId":"r1","params":{"jobIds":["EXISTING_ID"]}}'
-
-./cli/bro.js '{"action":"runScenario","scenarioId":"linkedin-scheduled-posts","requestId":"r2"}'
+curl -sS -X POST http://localhost:7823/command \
+  -H 'Content-Type: application/json' \
+  -d '{"type":"tabs","query":{}}'
 ```
 
-Node tests:
-
-```sh
-find tests -name '*.test.mjs' | sort | xargs node --test --test-force-exit
-```
-
-The same discovery pattern runs in **GitHub Actions** on every push and pull request (workflow `.github/workflows/node-tests.yml`).
+See `extension/README.md` for the full HTTP API reference.
 
