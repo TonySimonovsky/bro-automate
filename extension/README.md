@@ -84,7 +84,7 @@ Do **not** interleave `POST /command` while `/run-scenario` is active: the serve
 
 ## Agent workflows
 
-### A) Atomic commands (full control)
+### A) Atomic commands (full control) 
 
 Typical sequence for CDP on a **new** tab:
 
