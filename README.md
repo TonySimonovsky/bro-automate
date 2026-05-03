@@ -50,5 +50,5 @@ curl -sS -X POST http://localhost:7823/command \
   -d '{"type":"tabs","query":{}}'
 ```
 
-See `extension/README.md` for the full HTTP API reference.
+See `extension/README-for-agents-use-skill-draft.md` for the scenario-runner reference (AI agents). See `extension/README.md` for the full HTTP API reference.
 

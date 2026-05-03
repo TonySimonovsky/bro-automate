@@ -54,7 +54,7 @@ scenario_path_contract:
     other_files: "The runner only checks execute.cdp.js and verify.cdp.js by fixed pathname; it does not enumerate or require other paths under the step directory."
   filenames_case_sensitive: true
   run_artifacts_log:
-    location: "Separate from the Scenario Package directory: path.resolve('tmp')/rpa-run-<ISO8601-with-:-and-.-replaced>.log.json on the bridge host (same cwd semantics as scenarioPath)."
+    location: "Inside the Scenario Package directory: <scenarioPath>/tmp/rpa-run-<ISO8601-with-:-and-.-replaced>.log.json. The runner creates the tmp/ subdirectory with mkdirSync({ recursive: true }) before writing."
   agent_only:
     input_json:
       path: "<Scenario Package root>/input.json"
@@ -68,6 +68,20 @@ scenario_path_contract:
 **Purpose:** Drive Chrome programmatically by sending **JSON commands** to a local HTTP bridge. The bridge forwards work to a Manifest V3 extension that runs **Chrome DevTools Protocol (CDP 1.3)** calls on tabs via `chrome.debugger`. You either send **atomic commands** (`POST /command`) or run a **Scenario Package** (`POST /run-scenario`): a directory on the bridge host whose path you pass as **`scenarioPath`** (see [Scenario Package layout](#scenario-package-layout)).
 
 **Assume:** `GET http://localhost:7823/status` returns HTTP 200 (bridge up). The attached extension long-polls `GET /next` on that same host so commands complete.
+
+---
+
+## Starting the bridge
+
+If the status check fails, start the bridge from the repository root (Node.js required — no additional dependencies):
+
+```bash
+node extension/server.js
+```
+
+The bridge listens on `http://localhost:7823` and logs to stdout. Load the extension in Chrome first (`chrome://extensions` → Developer mode → **Load unpacked** → select `extension/`). The extension connects automatically on load and begins long-polling.
+
+**Verify:** `curl -sS http://localhost:7823/status` should return JSON with `"inFlight": false`.
 
 ---
 
@@ -204,13 +218,55 @@ If the agent is supposed to operate within **one** tab and **one** group across 
 
 **Response:** HTTP 200 + run snapshot JSON (see [Run result](#run-result)). The snapshot includes `tabOwned` — `true` if the runner created the tab, `false` if the caller passed `tabId`.
 
-**Side effects:** Writes a JSON log file under `tmp/rpa-run-<timestamp>.log.json` relative to the **Node process current working directory**. **When `tabId` is omitted:** creates one tab, groups it, runs steps, **detach**es always, closes tab only if `success`. **When `tabId` is provided:** runs steps on that tab, **detach**es always, **never closes** the tab and never alters the group.
+**Side effects:** Writes a JSON log file at `<scenarioPath>/tmp/rpa-run-<timestamp>.log.json` (inside the Scenario Package root; the `tmp/` subdirectory is created automatically). **When `tabId` is omitted:** creates one tab, groups it, runs steps, **detach**es always, closes tab only if `success`. **When `tabId` is provided:** runs steps on that tab, **detach**es always, **never closes** the tab and never alters the group.
 
 **Errors:** HTTP 400 if `scenarioPath` missing; HTTP 500 with `{ "error": "<message>" }` on runner failure (including: caller passed `tabId` that no longer exists; debugger could not attach because another client is already attached).
 
 ### `GET /status` · `GET /status?tail=<n>`
 
-Returns JSON: when a run is active, `inFlight`, `scenarioPath` (resolved absolute path of the Scenario Package), `tabId`, `currentStep`, `currentPhase`, `stepsDone`, `totalStepsKnown`, `currentCommand` (payload summary), `logFile`, `recentEvents`. When idle, `inFlight: false` plus optional last-run hints.
+Returns JSON. The default tail window is the last 20 events (max 50).
+
+**Idle shape:**
+
+```json
+{
+  "inFlight": false,
+  "lastRunSuccess": true,
+  "lastRunLogFile": "/abs/path/to/scenario-root/tmp/rpa-run-2026-05-01T12-00-00-000Z.log.json",
+  "recentEvents": ["[rpa-cdp-v002 2026-05-01T12:05:00.000Z] ■ run finished success=true ..."]
+}
+```
+
+`lastRunSuccess` and `lastRunLogFile` are `null` if no run has completed since the bridge started.
+
+**In-flight shape:**
+
+```json
+{
+  "inFlight": true,
+  "startedAt": "2026-05-01T12:00:00.000Z",
+  "scenarioPath": "/abs/path/to/scenario-root",
+  "tabId": 123456789,
+  "currentStep": 2,
+  "currentPhase": "execute",
+  "stepsDone": 1,
+  "totalStepsKnown": 3,
+  "currentCommand": {
+    "_cmdId": 42,
+    "type": "cdp",
+    "method": "Runtime.evaluate",
+    "tabId": 123456789,
+    "sentAt": 1746100800123,
+    "ageMs": 450
+  },
+  "logFile": "/abs/path/to/scenario-root/tmp/rpa-run-2026-05-01T12-00-00-000Z.log.json",
+  "recentEvents": ["[rpa-cdp-v002 2026-05-01T12:00:01.000Z] → send #42 cdp Runtime.evaluate tab=123456789 ..."]
+}
+```
+
+`currentCommand` is `null` between commands (between steps or phases). `recentEvents` is an array of plain strings; each entry has the format `[rpa-cdp-v002 <ISO8601>] <message>`.
+
+**Agent polling pattern:** poll `GET /status` at your chosen interval; stop when `inFlight` is `false`, then read `GET /last-run` for the full result.
 
 ### `GET /last-run`
 
@@ -243,6 +299,8 @@ Extension responses are either `{ "success": true, ... }` or `{ "success": false
 ```
 
 CDP protocol version **1.3**. **Returns:** `{ "success": true }`.
+
+**Not idempotent.** Calling `attach` on a tab that already has a debugger attached (by this bridge or Chrome DevTools) returns `{ "success": false, "error": "Another debugger is already attached to the target with id: <tabId>" }`. If you see this error, issue `detach` once first, then retry `attach`.
 
 ### `detach`
 
@@ -282,6 +340,8 @@ CDP protocol version **1.3**. **Returns:** `{ "success": true }`.
 ```json
 { "type": "group-tab", "tabId": <number>, "title": "", "color": "blue" }
 ```
+
+`color` must be one of Chrome's `TabGroupColor` enum values: `"grey"`, `"blue"`, `"red"`, `"yellow"`, `"green"`, `"pink"`, `"purple"`, `"cyan"`, `"orange"`. Default: `"blue"`.
 
 **Returns:** `{ "success": true, "groupId" }`.
 
@@ -357,7 +417,7 @@ Values in **`params`** are forwarded verbatim to `execute(tabId, params)` and `v
 
 Step 3 omits `verify.cdp.js` only to show the real outcome **`verifySkipped`** when that file is missing (see `server.js`); it is not an extra file type you must add.
 
-Run JSON logs written by the bridge live under **`tmp/rpa-run-*.log.json`** (resolved from the bridge process **`path.resolve('tmp')`**), not inside the Scenario Package unless you place a `tmp` directory accordingly **and** the server cwd matches — see frontmatter `scenario_path_contract.run_artifacts_log`.
+Run JSON logs written by the bridge live under **`<scenarioPath>/tmp/rpa-run-*.log.json`** — inside the Scenario Package root's `tmp/` subdirectory, which the runner creates automatically. See frontmatter `scenario_path_contract.run_artifacts_log`.
 
 ### Missing `execute` / `verify` files
 
@@ -565,17 +625,21 @@ Shape returned by `POST /run-scenario` and `GET /last-run` (illustrative). Field
       "done": true
     }
   ],
-  "logFile": "/absolute/path/to/tmp/rpa-run-2026-05-01T12-00-00-000Z.log.json"
+  "logFile": "/absolute/path/to/scenario-package-root/tmp/rpa-run-2026-05-01T12-00-00-000Z.log.json"
 }
 ```
 
 `tabOwned` is **`true`** when the runner created the tab itself (default mode) and **`false`** when the caller passed `tabId` on the request. When `tabOwned: false`, the runner does not close the tab regardless of `success`. Failures may set `aborted`, `execute`/`verify` with `error`, and leave `tabId` open in the browser.
 
+### Log file
+
+The `logFile` at `<scenarioPath>/tmp/rpa-run-<timestamp>.log.json` is a JSON file with **the same shape as the run result above**, written incrementally during the run (so intermediate reads may show `null` for `finishedAt` and `success`). It is the on-disk equivalent of the `POST /run-scenario` response and `GET /last-run` body.
+
 ---
 
 ## Agent-relevant behavior
 
-- **Queue exclusivity:** Only one Scenario Package run (`/run-scenario`) at a time; `/command` is rejected with 409 until it finishes.
+- **Queue exclusivity:** Only one Scenario Package run (`/run-scenario`) at a time; `/command` is rejected with 409 until it finishes. A second concurrent `POST /run-scenario` while one is in-flight is **not** rejected with 409, but it overwrites the shared bridge state and produces undefined behavior — never call `/run-scenario` concurrently.
 - **Command identity:** The server tags outgoing commands with `_cmdId`. If the extension’s service worker restarts mid-flight, the same id may receive a **cached result** instead of duplicate side effects (bounded cache).
 - **Navigation drift:** The server logs when an observed URL host/path diverges from the last `Page.navigate` request for that tab (visible in `recentEvents` / stdout).
 - **Debugger UX:** Attached tabs show Chrome’s automated-debugger UI; plan waits accordingly.
